@@ -1,0 +1,2 @@
+#!/bin/sh
+./icb.py -l $HOSTNAME -n $HOSTNAME -g agora -s 10.0.0.10

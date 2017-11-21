@@ -1,0 +1,4 @@
+ifconfig eth0 10.0.0.10/24
+cd /root
+mkdir log
+./icbd -4 -C -d -G agora -L log -n -S daicbd -v 0.0.0.0:7326 &
