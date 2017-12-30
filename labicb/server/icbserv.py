@@ -24,9 +24,11 @@ ENCODING      = 'utf-8'
 IP_NO_FILTER  = '0.0.0.0'
 PENDING_SLOTS = 3
 TAB_SZ        = 5
+CONFIG_FILE   = None
 
 CMD_GROUP = '/g'
 CMD_HELP  = '/?'
+CMD_LOGIN = 'login'
 CMD_MSG   = '/m'
 CMD_NAME  = '/name'
 CMD_PASS  = '/pass'
@@ -134,7 +136,7 @@ def quit_cmd(t, c, socks):
     for i in range (chanel['group']):
         if who in chanel[i]['user']:
             chanel[i]['user'].remove(who)
-            if group[i]['user'] == ""
+            if group[i]['user'] == '':
                 groupName = group[i]
                 group['group']['modo'].remove(who)
                 group['group'].remove(groupName)
@@ -144,7 +146,7 @@ def serv_print(msg='', subj=''):
     """ TODO: function definition
     """
     serv_printing = ''
-    if not subj :
+    if subj != '' :
         serv_printing += '[={}=] '.format(subj)
     print(serv_printing + msg)
 
@@ -155,7 +157,7 @@ def topic_cmd(t, c):
         msg='[=Error=] Missing a Topic'
         c.send(msg.encode(ENCODING))
 
-        serv_print('[=Debug=] Missing a Topic', 'Debug')
+        serv_print('Missing a Topic', 'Debug')
         return
     else:
         serv_print('Topic Detected: {}'.format(t[2:]), 'Debug')
@@ -181,20 +183,34 @@ def whois(c):
         msg = '{}\n'.format(chanel[i]['user'])
         c.send(msg.encode(ENCODING))
 
+def login(self, command = 'login'):
+        self.send([self.M_LOGIN, self.logid,
+          self.nickname, self.group, command, ''])
+
+def read_config_file(CONFIG_FILE = None):
+        if CONFIG_FILE == None:
+            CONFIG_FILE = CONFIG_FILE
+        try:
+            f = open(CONFIG_FILE, "r")
+        except:
+            msg=("warning: can't read config file, using defaults.\n")
+            c.send(msg.encode(ENCODING))
+            return
 
 if __name__ == '__main__':
-    # création du socket
+    # creat socket
     s = create_sock()
     s.listen(PENDING_SLOTS)
-    serv_print('Listening on port {}'.format(DEFAULT_PORT))
+    serv_print('Listening on port {}'.format(DEFAULT_PORT),'Waiting')
 
-    # liste des sockets ouvert
+    # Socket list
     socks = [s]
 
     while True:
       # wait for an incoming message
       lin, lout, lex = select(socks, [], []) 
       serv_print('select got {} read events'.format(len(lin)))
+      read_config_file()
 
       for t in lin:
         chanel['group']['user'].append(t.getpeername()[0])
@@ -205,8 +221,13 @@ if __name__ == '__main__':
             socks.append(c)
             c.send(msg.encode(ENCODING))
 
+        # Command login
+            if t.startswitht(CMD_LOGIN):
+                self.login(CMD_LOGIN)
+                serv_print('Login', 'Debug')
+
         # Command /whois
-            if t.startswith(CMD_WHOIS):
+            elif t.startswith(CMD_WHOIS):
                 whois(c)
                 serv_print('General Location', 'Debug')
 
