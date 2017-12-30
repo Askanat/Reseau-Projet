@@ -31,7 +31,7 @@ while True:
       buf = msg.encode('utf-8')
       c.send(buf)
 
-    # Command /whois
+# Command /whois
     if t.startswith('/w'):
         for i in range (dict['group']):
             msg="Group : %s     Modo: %s    Topic: %s\n" % (dict[group], 
@@ -44,7 +44,7 @@ while True:
         # Debug
         print('[=Debug=] General Localtion')
 
-    # Command /message
+# Command /message
     if t.startswith('/m'):
         if len(t[1:]) > 2:
             who=t.getpeername()[0]
