@@ -134,6 +134,11 @@ def quit_cmd(t, c, socks):
     for i in range (groupe['group']):
         if who in groupe[i]['user']:
             groupe[i]['user'].remove(who)
+            if group[i]['user'] == ""
+                groupName = group[i]
+                group['group']['modo'].remove(who)
+                group['group'].remove(groupName)
+    serv_print('Has left: {}'.format(t[2:]), 'Debug')
 
 def serv_print(msg='', subj=''):
     """ TODO: function definition
