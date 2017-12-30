@@ -10,8 +10,8 @@ from socket import SOL_SOCKET
 from socket import SO_REUSEADDR
 
 
-# groupe[nom] : [[modo] [user] [topic]]
-groupe = {
+# chanel[nom] : [[modo] [user] [topic]]
+chanel = {
     'group': 'agora',
     'user' : '',
     'modo' : '(None)',
@@ -62,16 +62,16 @@ def group_cmd(t, c):
     else:
         serv_print('Group name Detected: {}'.format(t[2:]), 'Debug')
 
-    for i in range (groupe['group']):
-        if t.getpeername()[0] in groupe[i][[user]]:
-            groupe[i]['user'].remove(t.getpeername()[0])
+    for i in range (chanel['group']):
+        if t.getpeername()[0] in chanel[i]['user']:
+            chanel[i]['user'].remove(t.getpeername()[0])
             msg = '[=Depart=] {} just left\n'.format(t.getpeername()[0])
             c.send(msg.encode(ENCODING))
 
-    groupe['group'].append(format(t[2:]))
-    groupe[format(t[2:])]['user'].append(t.getpeername()[0])
+    chanel['group'].append(format(t[2:]))
+    chanel[format(t[2:])]['user'].append(t.getpeername()[0])
 
-    msg = '[=Status=] You are now in groupe {} as moderator\n'.format(format(t[2:]))
+    msg = '[=Status=] You are now in chanel {} as moderator\n'.format(format(t[2:]))
     c.send(msg.encode(ENCODING))
 
 def msg_cmd(t, c):
@@ -104,10 +104,10 @@ def name_cmd(t, c):
     oldNick = t.getpeername()[0]
     t.getpeername()[0] = format(t[2:])
     msg = '[=Name=] {} changed nicname to {}\n'.format(oldNick, t.getpeername()[0])
-    for i in range (groupe['group']):
-        if oldNick in groupe[i]['user']:
-            groupe[i]['user'].remove(oldNick)
-            groupe[i]['user'].append(format(t[2:]))
+    for i in range (chanel['group']):
+        if oldNick in chanel[i]['user']:
+            chanel[i]['user'].remove(oldNick)
+            chanel[i]['user'].append(format(t[2:]))
 
     serv_print('NickName Detected: {}'.format(t[2:]), 'Debug')
 
@@ -115,10 +115,10 @@ def pass_cmd(t, c):
     """ TODO: function definition
     """
     who=t.getpeername()[0]
-    for i in range (groupe['group']):
-        if who in groupe[i]['user']:
-            if groupe[i]['modo'] == '':
-                groupe[i]['modo'] = who
+    for i in range (chanel['group']):
+        if who in chanel[i]['user']:
+            if chanel[i]['modo'] == '':
+                chanel[i]['modo'] = who
     msg='[=Notify=] Server has passed moderation to {} \n'.format(who)
     c.send(msg.encode(ENCODING))
 
@@ -131,9 +131,9 @@ def quit_cmd(t, c, socks):
 
     socks.remove(t)
 
-    for i in range (groupe['group']):
-        if who in groupe[i]['user']:
-            groupe[i]['user'].remove(who)
+    for i in range (chanel['group']):
+        if who in chanel[i]['user']:
+            chanel[i]['user'].remove(who)
             if group[i]['user'] == ""
                 groupName = group[i]
                 group['group']['modo'].remove(who)
@@ -161,24 +161,24 @@ def topic_cmd(t, c):
         serv_print('Topic Detected: {}'.format(t[2:]), 'Debug')
 
     who=t.getpeername()[0]
-    for i in range (groupe['group']):
-        if who in groupe[i]['user']:
-            groupe[i]['topic'] = format(t[2:])
+    for i in range (chanel['group']):
+        if who in chanel[i]['user']:
+            chanel[i]['topic'] = format(t[2:])
 
 def whois(c):
     """ TODO: function definition
     """
     msg = 'Group : {}\tModo: {}\tTopic: {}\n'
     msg = msg.format(
-            groupe['group'], 
-            groupe['group']['modo'], 
-            groupe['group']['topic']
+            chanel['group'], 
+            chanel['group']['modo'], 
+            chanel['group']['topic']
         )
     msg.expandtabs(TAB_SZ)
     c.send(msg.encode(ENCODING))
 
-    for i in range (groupe['group']):
-        msg = '{}\n'.format(groupe[i]['user'])
+    for i in range (chanel['group']):
+        msg = '{}\n'.format(chanel[i]['user'])
         c.send(msg.encode(ENCODING))
 
 
@@ -197,7 +197,7 @@ if __name__ == '__main__':
       serv_print('select got {} read events'.format(len(lin)))
 
       for t in lin:
-        groupe['group']['user'].append(t.getpeername()[0])
+        chanel['group']['user'].append(t.getpeername()[0])
         
         if t == s: # this is an incoming connection
             c, addr = s.accept()
@@ -226,7 +226,6 @@ if __name__ == '__main__':
             elif t.startswith(CMD_TOPIC):
                 topic_cmd(t, c)
                 
-
         # Command /pass
             elif t.startswith(CMD_PASS):
                 pass_cmd(t, c)
