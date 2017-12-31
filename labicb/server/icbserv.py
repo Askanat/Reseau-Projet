@@ -18,13 +18,20 @@ chanel = {
     'topic': '(None)'
 }
 
+socks = {
+    'name'  : '',
+    'socket': '',
+    'c'     : ''
+}
+
 BUFF_SZ       = 1024
+CONFIG_FILE   = None
 DEFAULT_PORT  = 7326
 ENCODING      = 'utf-8'
 IP_NO_FILTER  = '0.0.0.0'
-PENDING_SLOTS = 3
+M_LOGIN       = 'a'
+PENDING_SLOTS = 1
 TAB_SZ        = 5
-CONFIG_FILE   = None
 
 CMD_GROUP = '/g'
 CMD_HELP  = '/?'
@@ -38,7 +45,9 @@ CMD_WHOIS = '/w'
 
 
 def create_sock():
-    """ TODO: function definition
+    """Socket creator
+    Attributes:
+        None
     """
     s = socket()
     s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
@@ -46,7 +55,9 @@ def create_sock():
     return s
 
 def display_help(c):
-    """ TODO: function definition
+    """Command /?
+    Attributes:
+        c : permite to send message
     """
     msg='[=Help=] Server supports following commands:\n'
     c.send(msg.encode(ENCODING))
@@ -54,7 +65,10 @@ def display_help(c):
     c.send(msg.encode(ENCODING))
 
 def group_cmd(t, c):
-    """ TODO: function definition
+    """Command /g
+    Attributes:
+        t : incoming information
+        c : permite to send message
     """
     if len(t[1:]) < 2:
         msg = '[=Error=] Missing a Group Name'
@@ -77,7 +91,10 @@ def group_cmd(t, c):
     c.send(msg.encode(ENCODING))
 
 def msg_cmd(t, c):
-    """ TODO: function definition
+    """Command /m
+    Attributes:
+        t : incoming information
+        c : permite to send message
     """
     if len(t[1:]) < 2:
         msg = '[=Error=] Missing a Recipient'
@@ -86,14 +103,21 @@ def msg_cmd(t, c):
         return
     else:
         serv_print('Username Detected: {}'.format(t[2:]), 'Debug')
+
+    for i in range (socks['name']):
+        if format(t[2:]) in socks['name']:
+            c = socks[format(t[2:])]['c']
     
-    data = t.recv(1024)
+    data = t.recv(BUFF_SZ)
     who  = t.getpeername()[0]
     msg  = '<* {} *> {}\n'.format(who, data.strip())
     c.send(msg.encode(ENCODING))
 
 def name_cmd(t, c):
-    """ TODO: function definition
+    """Command /name
+    Attributes:
+        t : incoming information
+        c : permite to send message
     """
     if len(t[1:]) < 2:
         msg = '[=Name=] Your nickname is {}\n'.format(t.getpeername()[0])
@@ -114,7 +138,10 @@ def name_cmd(t, c):
     serv_print('NickName Detected: {}'.format(t[2:]), 'Debug')
 
 def pass_cmd(t, c):
-    """ TODO: function definition
+    """Command /pass
+    Attributes:
+        t : incoming information
+        c : permite to send message
     """
     who=t.getpeername()[0]
     for i in range (chanel['group']):
@@ -125,13 +152,18 @@ def pass_cmd(t, c):
     c.send(msg.encode(ENCODING))
 
 def quit_cmd(t, c, socks):
-    """ TODO: function definition
+    """Command /nq
+    Attributes:
+        t : incoming information
+        c : permite to send message
     """
     who = t.getpeername()[0]
     msg = '[=Sign-off=] {} JustLeft \n'.format(who)
     c.send(msg.encode(ENCODING))
 
-    socks.remove(t)
+    socks['name'].remove(who)
+    socks['socket'].remove(t)
+    socks['c'].remove(c)
 
     for i in range (chanel['group']):
         if who in chanel[i]['user']:
@@ -143,7 +175,10 @@ def quit_cmd(t, c, socks):
     serv_print('Has left: {}'.format(t[2:]), 'Debug')
 
 def serv_print(msg='', subj=''):
-    """ TODO: function definition
+    """Create debug message
+    Attributes:
+        msg  : message for the user
+        subj : header of message 
     """
     serv_printing = ''
     if subj != '' :
@@ -151,7 +186,10 @@ def serv_print(msg='', subj=''):
     print(serv_printing + msg)
 
 def topic_cmd(t, c):
-    """ TODO: function definition
+    """Command /topic
+    Attributes:
+        t : incoming information
+        c : permite to send message
     """
     if len(t[1:]) < 2:
         msg='[=Error=] Missing a Topic'
@@ -168,7 +206,9 @@ def topic_cmd(t, c):
             chanel[i]['topic'] = format(t[2:])
 
 def whois(c):
-    """ TODO: function definition
+    """Command /w
+    Attributes:
+        c : permite to send message
     """
     msg = 'Group : {}\tModo: {}\tTopic: {}\n'
     msg = msg.format(
@@ -183,42 +223,58 @@ def whois(c):
         msg = '{}\n'.format(chanel[i]['user'])
         c.send(msg.encode(ENCODING))
 
+    msg = 'Total : {} users in {} groups\n' 
+    msg = msg.format(
+            len(chanel['user']),
+            len(chanel['group'])
+        )
+    c.send(msg.encode(ENCODING))
+
 def login(self, command = 'login'):
-        self.send([self.M_LOGIN, self.logid,
-          self.nickname, self.group, command, ''])
+    """Allow login
+    Attributes:
+        self    : tell him self
+        command : take login information
+    """
+    self.send([self.M_LOGIN, self.logid,
+        self.nickname, self.group, command, ''])
 
 def read_config_file(CONFIG_FILE = None):
-        if CONFIG_FILE == None:
-            CONFIG_FILE = CONFIG_FILE
-        try:
-            f = open(CONFIG_FILE, "r")
-        except:
-            msg=("warning: can't read config file, using defaults.\n")
-            c.send(msg.encode(ENCODING))
-            return
+    """Read information in config file
+    Attributes:
+        CONFIG_FILE : constant locoation of file
+    """
+    if CONFIG_FILE == None:
+        CONFIG_FILE = CONFIG_FILE
+    try:
+        f = open(CONFIG_FILE, "r")
+    except:
+        msg=("warning: can't read config file, using defaults.\n")
+        c.send(msg.encode(ENCODING))
+        return
 
 if __name__ == '__main__':
     # creat socket
     s = create_sock()
     s.listen(PENDING_SLOTS)
     serv_print('Listening on port {}'.format(DEFAULT_PORT),'Waiting')
-
     # Socket list
-    socks = [s]
+    socks['socket']=[s]
 
     while True:
       # wait for an incoming message
-      lin, lout, lex = select(socks, [], []) 
+      lin, lout, lex = select(socks['socket'], [], []) 
       serv_print('select got {} read events'.format(len(lin)))
       read_config_file()
 
       for t in lin:
         chanel['group']['user'].append(t.getpeername()[0])
-        
+        socks['name'].append(t.getpeername()[0])
+
         if t == s: # this is an incoming connection
             c, addr = s.accept()
             serv_print('Hello {}\n'.format(addr[0]))
-            socks.append(c)
+            socks['c'].append(c)
             c.send(msg.encode(ENCODING))
 
         # Command login
@@ -268,11 +324,13 @@ if __name__ == '__main__':
                 who  = t.getpeername()[0]
 
                 if not data:
-                    socks.remove(t)
+                    socks['name'].remove(who)
+                    socks['socket'].remove(t)
+                    socks['c'].remove(c)
                     msg = '[=Sign-off=] Drop Connection {}!\n'.format(who)
                 else:
                     msg = '{}: {}\n'.format(who, data.strip())
                 
                 serv_print (msg)
-                for c in socks[1:]:
+                for c in socks['c']:
                     c.send(msg)
