@@ -9,6 +9,8 @@ from socket import socket
 from socket import SOL_SOCKET
 from socket import SO_REUSEADDR
 
+import sys
+
 #IPS[name] : [[]]
 
 socks = {
@@ -17,21 +19,27 @@ socks = {
     'c'     : ''
 }
 
+ips     = []
+ipsban  = []
+
 BUFF_SZ       = 1024
 CONFIG_FILE   = None
 DEFAULT_PORT  = 1664
 ENCODING      = 'utf-8'
 IP_NO_FILTER  = '0.0.0.0'
+PENDING_SLOTS = 999
+TAB_SZ        = 5
 
-CMD_BAN 	= '/ban'
-CMD_UNBAN 	= '/unban'
-CMD_QUIT	= '/quit'
-CMD_PM		= '/pm'
-CMD_BM		= '/bm'
-CMD_LIST	= '/ips'
+CMD_BAN     = '/ban'
+CMD_UNBAN   = '/unban'
+CMD_QUIT    = '/quit'
+CMD_PM      = '/pm'
+CMD_BM      = '/bm'
+CMD_IPS     = '/ips'
+
 
 """
-	Server
+    Server
 """
 def create_sock():
     """Socket creator
@@ -41,6 +49,26 @@ def create_sock():
     s = socket()
     s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
     s.bind((IP_NO_FILTER, DEFAULT_PORT))
+    return s
+
+def create_sock_ip(ip):
+    """Socket creator
+    Attributes:
+        ip : specific IP
+    """
+    if len(ipsban)>0:
+        for i in range (ipsban):
+            if ip == ipsban[i]:
+                print("This IP {} is ban!\n".format(ip))
+                return
+
+    print(ip)
+    
+    s = socket()
+    s.connect((ip, DEFAULT_PORT))
+    serv_print('Connection on: {}'.format(ip), 'Debug')
+    msg = "START\n"
+    s.send(msg)
     return s
 
 def serv_print(msg='', subj=''):
@@ -56,7 +84,7 @@ def serv_print(msg='', subj=''):
 
 
 """
-	Server Command
+    Server Command
 """
 def display_help(c):
     """Command /?
@@ -84,29 +112,13 @@ def quit_cmd(t, c, socks):
 
     serv_print('Has left: {}'.format(t[2:]), 'Debug')
 
-def whois(c):
+def ips_cmd(c):
     """Command /w
     Attributes:
         c : permite to send message
     """
-    msg = 'Group : {}\tModo: {}\tTopic: {}\n'
-    msg = msg.format(
-            chanel['group'], 
-            chanel['group']['modo'], 
-            chanel['group']['topic']
-        )
-    msg.expandtabs(TAB_SZ)
-    c.send(msg.encode(ENCODING))
-
-    for i in range (chanel['group']):
-        msg = '{}\n'.format(chanel[i]['user'])
-        c.send(msg.encode(ENCODING))
-
-    msg = 'Total : {} users in {} groups\n' 
-    msg = msg.format(
-            len(chanel['user']),
-            len(chanel['group'])
-        )
+    for i in range (socks['name']):
+        msg = format(ips.append(socks[i]))
     c.send(msg.encode(ENCODING))
 
 def name_cmd(t, c):
@@ -127,7 +139,7 @@ def name_cmd(t, c):
    
     serv_print('NickName Detected: {}'.format(t[2:]), 'Debug')
 
-def msg_cmd(t, c):
+def msgp_cmd(t, c):
     """Command /pm
     Attributes:
         t : incoming information
@@ -150,15 +162,89 @@ def msg_cmd(t, c):
     msg  = '<* {} *> {}\n'.format(who, data.strip())
     c.send(msg.encode(ENCODING))
 
+def msgb_cmd(t, c):
+    """Command /bm
+    Attributes:
+        t : incoming information
+        c : permite to send message
+    """
+    for i in range (socks['name']):
+        if len(ipsban) != 0:
+            for j in range (ipsban):
+                if socks[i] == ipsban[j]:
+                    c    = socks[i]['c']
+                    data = t.recv(BUFF_SZ)
+                    who  = t.getpeername()[0]
+                    msg  = '<* {} *> {}\n'.format(who, data.strip())
+                    c.send(msg.encode(ENCODING))
+        else:
+            c    = socks[i]['c']
+            data = t.recv(BUFF_SZ)
+            who  = t.getpeername()[0]
+            msg  = '<* {} *> {}\n'.format(who, data.strip())
+            c.send(msg.encode(ENCODING))
+
+def ban_cmd(t, c):
+    """Command /ban
+    Attributes:
+        t : incoming information
+        c : permite to send message
+    """
+    if len(t[1:]) < 2:
+        msg = '[=Error=] Missing a Name'
+        c.send(msg.encode(ENCODING))
+        serv_print('Missing a Name', 'Debug')
+        return
+    else:
+        serv_print('Username Detected: {}'.format(t[2:]), 'Debug')
+
+    for i in range (socks['name']):
+        if socks[i] == format(t[2:]):
+            ipsban.append(format(t[2:]))
+            socks['name'].remove(who)
+            socks['socket'].remove(t)
+            socks['c'].remove(c)
+
+def unban_cmd(t, c):
+    """Command /unban
+    Attributes:
+        t : incoming information
+        c : permite to send message
+    """
+    if len(t[1:]) < 2:
+        msg = '[=Error=] Missing a Name'
+        c.send(msg.encode(ENCODING))
+        serv_print('Missing a Name', 'Debug')
+        return
+    else:
+        serv_print('Username Detected: {}'.format(t[2:]), 'Debug')
+
+    for i in range (ipsban):
+        if ipsban[i] == format(t[2:]):
+            ipsban.remove(format(t[2:]))
 
 
+"""
+    MAIN
+"""
 if __name__ == '__main__':
-    # creat socket
-    s = create_sock()
-    s.listen(PENDING_SLOTS)
-    serv_print('Listening on port {}'.format(DEFAULT_PORT),'Waiting')
-    # Socket list
-    socks['socket']=[s]
+    
+    name = raw_input("What is your name?")
+
+    if sys.argv[1:]:
+        ip = str(sys.argv[1:])
+        s = create_sock_ip(ip)
+        s.listen(PENDING_SLOTS)
+        serv_print('Listening on port {}'.format(DEFAULT_PORT),'Waiting')
+        # Socket list
+        socks['socket']=[s]
+    else:
+        # creat socket
+        s = create_sock()
+        s.listen(PENDING_SLOTS)
+        serv_print('Listening on port {}'.format(DEFAULT_PORT),'Waiting')
+        # Socket list
+        socks['socket']=[s]
 
     while True:
       # wait for an incoming message
@@ -171,22 +257,39 @@ if __name__ == '__main__':
 
         if t == s: # this is an incoming connection
             c, addr = s.accept()
-            serv_print('Hello {}\n'.format(addr[0]))
-            socks['c'].append(c)
-            c.send(msg.encode(ENCODING))
+            if t.startswith('START'):
+                serv_print('START')
+                socks['c'].append(c)
+                msg = 'START'
+                c.send(msg.encode(ENCODING))
 
-        # Command /whois
-            elif t.startswith(CMD_WHOIS):
-                whois(c)
-                serv_print('General Location', 'Debug')
+            elif t.startswith('HELLO'):
+                serv_print('HELLO')
+                name_cmd(name,c)
+                serv_print('HELLO {}\n'.format(addr[0]))
+                msg = 'HELLO I am {}\n'.format(addr[0])
+                c.send(msg.encode(ENCODING))
+           
+        # Command /ips
+            if t.startswith(CMD_IPS):
+                ips_cmd(c)
+                serv_print('Ips List', 'Debug')
 
-        # Command /message
+        # Command /pm
             elif t.startswith(CMD_PM):
-                msg_cmd(t, c)
+                msgp_cmd(t, c)
 
-        # Command /name
-            elif t.startswith(CMD_NAME):
-                name_cmd(t, c)
+        # Command /bm
+            elif t.startswith(CMD_BM):
+                msgb_cmd(t, c)
+
+        # Command /ban
+            elif t.startswith(CMD_BAN):
+                ban_cmd(t, c)
+
+        # Command /unban
+            elif t.startswith(CMD_UNBAN):
+                unban_cmd(t, c)
                 
         # Command /?
             elif t.startswith(CMD_HELP):
