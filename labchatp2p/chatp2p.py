@@ -159,7 +159,7 @@ def msgp_cmd(t, c):
     
     data = t.recv(BUFF_SZ)
     who  = t.getpeername()[0]
-    msg  = '<* {} *> {}\n'.format(who, data.strip())
+    msg  = '<* Private Message From : {} *> {}\n'.format(who, data.strip())
     c.send(msg.encode(ENCODING))
 
 def msgb_cmd(t, c):
@@ -181,7 +181,7 @@ def msgb_cmd(t, c):
             c    = socks[i]['c']
             data = t.recv(BUFF_SZ)
             who  = t.getpeername()[0]
-            msg  = '<* {} *> {}\n'.format(who, data.strip())
+            msg  = '<* BroadCast Message From : {} *> {}\n'.format(who, data.strip())
             c.send(msg.encode(ENCODING))
 
 def ban_cmd(t, c):
@@ -258,13 +258,13 @@ if __name__ == '__main__':
         if t == s: # this is an incoming connection
             c, addr = s.accept()
             if t.startswith('START'):
-                serv_print('START')
+                serv_print('START 1000', 'Debug')
                 socks['c'].append(c)
                 msg = 'START'
                 c.send(msg.encode(ENCODING))
 
             elif t.startswith('HELLO'):
-                serv_print('HELLO')
+                serv_print('HELLO 2000', 'Debug')
                 name_cmd(name,c)
                 serv_print('HELLO {}\n'.format(addr[0]))
                 msg = 'HELLO I am {}\n'.format(addr[0])
@@ -274,14 +274,17 @@ if __name__ == '__main__':
             if t.startswith(CMD_IPS):
                 ips_cmd(c)
                 serv_print('Ips List', 'Debug')
+                serv_print('IPS 3000', 'Debug')
 
         # Command /pm
             elif t.startswith(CMD_PM):
                 msgp_cmd(t, c)
+                serv_print('PM 4000', 'Debug')
 
         # Command /bm
             elif t.startswith(CMD_BM):
                 msgb_cmd(t, c)
+                serv_print('BM 5000', 'Debug')
 
         # Command /ban
             elif t.startswith(CMD_BAN):
