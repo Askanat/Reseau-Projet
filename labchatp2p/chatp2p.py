@@ -201,7 +201,7 @@ def ban_cmd(t, c):
     for i in range (socks['name']):
         if socks[i] == format(t[2:]):
             ipsban.append(format(t[2:]))
-            socks['name'].remove(who)
+            socks['name'].remove(format(t[2:]))
             socks['socket'].remove(t)
             socks['c'].remove(c)
 
