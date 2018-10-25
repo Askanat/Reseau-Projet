@@ -11,8 +11,6 @@ from socket import SO_REUSEADDR
 
 import sys
 
-#IPS[name] : [[]]
-
 socks = {
     'name'  : '',
     'socket': '',
@@ -29,6 +27,11 @@ ENCODING      = 'utf-8'
 IP_NO_FILTER  = '0.0.0.0'
 PENDING_SLOTS = 999
 TAB_SZ        = 5
+CODE_START    = 1152
+CODE_HELLO    = 2152
+CODE_IPS      = 3152
+CODE_PM       = 4152
+CODE_BM       = 5152
 
 CMD_BAN     = '/ban'
 CMD_UNBAN   = '/unban'
@@ -258,13 +261,13 @@ if __name__ == '__main__':
         if t == s: # this is an incoming connection
             c, addr = s.accept()
             if t.startswith('START'):
-                serv_print('START 1000', 'Debug')
+                serv_print('START {}\n'.format(CODE_START), 'Debug')
                 socks['c'].append(c)
                 msg = 'START'
                 c.send(msg.encode(ENCODING))
 
             elif t.startswith('HELLO'):
-                serv_print('HELLO 2000', 'Debug')
+                serv_print('HELLO {}\n'.format(CODE_HELLO), 'Debug')
                 name_cmd(name,c)
                 serv_print('HELLO {}\n'.format(addr[0]))
                 msg = 'HELLO I am {}\n'.format(addr[0])
@@ -274,17 +277,17 @@ if __name__ == '__main__':
             if t.startswith(CMD_IPS):
                 ips_cmd(c)
                 serv_print('Ips List', 'Debug')
-                serv_print('IPS 3000', 'Debug')
+                serv_print('IPS {}\n'.format(CODE_IPS), 'Debug')
 
         # Command /pm
             elif t.startswith(CMD_PM):
                 msgp_cmd(t, c)
-                serv_print('PM 4000', 'Debug')
+                serv_print('PM {}\n'.format(CODE_PM), 'Debug')
 
         # Command /bm
             elif t.startswith(CMD_BM):
                 msgb_cmd(t, c)
-                serv_print('BM 5000', 'Debug')
+                serv_print('BM {}\n'.format(CODE_BM), 'Debug')
 
         # Command /ban
             elif t.startswith(CMD_BAN):
