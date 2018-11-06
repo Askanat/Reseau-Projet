@@ -61,15 +61,15 @@ def create_sock_ip(ip):
     """
     if len(ipsban)>0:
         for i in range (ipsban):
-            if ip[0] == ipsban[i]:
-                print("This IP %s is ban!\n"%(ip[0]))
+            if ip == ipsban[i]:
+                print("This IP %s is ban!\n"%(ip))
                 return
 
     print(ip)
     
     s = socket()
     s.connect((ip, DEFAULT_PORT))
-    serv_print('Connection on: %s'%(ip[0]), 'Debug')
+    serv_print('Connection on: %s'%(ip), 'Debug')
     msg = "START\n"
     s.send(msg)
     return s
@@ -84,15 +84,6 @@ def serv_print(msg='', subj=''):
     if subj != '' :
         serv_printing += '[=%s=] '%(subj)
     print(serv_printing + msg)
-
-def take_IP(ip):
-    iptransform = ""
-    for i in range (len(ip)):
-        if ip[i] != "[" or ip[i] != "'":
-            iptransform = iptransform + ip[i]
-            print(ip[i])
-    print(iptransform)
-    return iptransform
 
 
 """
@@ -240,16 +231,13 @@ def unban_cmd(t, c):
     MAIN
 """
 if __name__ == '__main__':
-    
+
     name = raw_input("What is your name?")
 
     if sys.argv[1:]:
-        ip = str(sys.argv[1:])
-        ip2 = take_IP(ip)
-        print(ip2)
-        s = create_sock_ip(ip2)
-        s.listen(PENDING_SLOTS)
-        serv_print('Listening on port %d'%(DEFAULT_PORT),'Waiting')
+        ip = sys.argv[1:]
+        print(ip[0])
+        s = create_sock_ip(ip[0])
         # Socket list
         socks['socket']=[s]
     else:
@@ -264,10 +252,9 @@ if __name__ == '__main__':
       # wait for an incoming message
       lin, lout, lex = select(socks['socket'], [], []) 
       serv_print('select got %s read events'%(len(lin)))
-      read_config_file()
 
       for t in lin:
-        socks['name'].append(t.getpeername()[0])
+        socks['name']=t.getpeername()[0]
 
         if t == s: # this is an incoming connection
             c, addr = s.accept()
