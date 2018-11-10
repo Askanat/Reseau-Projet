@@ -326,8 +326,8 @@ if __name__ == '__main__':
                 elif t == 'HELLO':
                     serv_print('HELLO %d\n'%(CODE_HELLO), 'Debug')
                     name_cmd(name,c)
-                    serv_print('HELLO %d\n'%(addr[0]))
-                    msg = 'HELLO I am %d\n'%(addr[0])
+                    serv_print('HELLO %d\n'%(name))
+                    msg = 'HELLO I am %d\n'%(name)
                     c.send(msg.encode(ENCODING))
             
             # Command /ipsv4
