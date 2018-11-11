@@ -4,10 +4,7 @@
 import select
 from select import select
 
-import socket
-from socket import socket
-from socket import SOL_SOCKET
-from socket import SO_REUSEADDR
+from socket import *
 
 import sys
 
@@ -55,7 +52,7 @@ def create_sock():
     s.bind((IP_NO_FILTER, DEFAULT_PORT))
     return s
 
-def create_sock_ip(ip):
+def create_sock_ip(ip, name):
     """Socket creator
     Attributes:
         ip : specific IP
@@ -68,8 +65,8 @@ def create_sock_ip(ip):
     s = socket()
     s.connect((ip, DEFAULT_PORT))
     serv_print('Connection on: %s'%(ip), 'Debug')
-    msg = "START\n"
-    s.send(msg)
+    msg = 'START %s\n'%name
+    s.send(msg.encode(ENCODING))
     return s
 
 def serv_print(msg='', subj=''):
@@ -235,7 +232,7 @@ if __name__ == '__main__':
 
     if sys.argv[1:]:
         ip = sys.argv[1:]
-        s = create_sock_ip(ip[0])
+        s = create_sock_ip(ip[0], name)
         # Socket list
         socks['socket']=[s]
         client = 1
@@ -247,134 +244,61 @@ if __name__ == '__main__':
         # Socket list
         socks['socket']=[s]
 
-    if client == 1:
-        while True:
-            # wait for an incoming message
-            lin, lout, lex = select(socks['socket'], [], []) 
-            serv_print('select got %s read events'%(len(lin)))
+    while True:
+        # wait for an incoming message
+        lin, lout, lex = select(socks['socket'], [], []) 
+        #serv_print('select got %s read events'%(len(lin)))
 
-            for t in lin:
-            # Command /ipsv4
-                if t == CMD_IPS:
-                    ips_cmd(c)
-                    serv_print('Ips List', 'Debug')
-                    serv_print('IPS %d\n'%(CODE_IPS), 'Debug')
-
-            # Command /pm
-                elif t == CMD_PM:
-                    msgp_cmd(t, c)
-                    serv_print('PM %d\n'%(CODE_PM), 'Debug')
-
-            # Command /bm
-                elif t == CMD_BM:
-                    msgb_cmd(t, c)
-                    serv_print('BM %d\n'%(CODE_BM), 'Debug')
-
-            # Command /ban
-                elif t == CMD_BAN:
-                    ban_cmd(t, c)
-
-            # Command /unban
-                elif t == CMD_UNBAN:
-                    unban_cmd(t, c)
-                    
-            # Command /?
-                elif t == CMD_HELP:
-                    display_help(c)
-                    serv_print ('Help command!\n', 'Debug')
-
-            # Command /quit
-                elif t == CMD_QUIT:
-                    quit_cmd(t, c, socks)
-                    serv_print ('Drop Connection %s!\n'%(who), 'Debug')
-
-            # Standart message
-                else: # someone is speaking
-                    data = t
-                    who  = name
-                    if not data:
-                        socks['name'].remove(who)
-                        socks['socket'].remove(t)
-                        socks['c'].remove(c)
-                        msg = '[=Sign-off=] Drop Connection %s!\n'%(who)
-                    else:
-                        msg = '%s: %s!\n'%(who, data)
-                    
-                    serv_print (msg)
-
-    if client == 0:
-        while True:
-          # wait for an incoming message
-          lin, lout, lex = select(socks['socket'], [], []) 
-          serv_print('select got %s read events'%(len(lin)))
-
-          for t in lin:
-            if t == s: # this is an incoming connection
-                c, addr = s.accept()
-                serv_print('Hello\n')
-                socks['c']=c
-                msg = 'Hello'
-                c.send(msg.encode(ENCODING))
-                #socks['name']=t.getpeername()[0]
-                if t == 'START':
-                    serv_print('START %d\n'%(CODE_START), 'Debug')
-                    socks['c'].append(c)
-                    msg = 'START'
+        for t in lin:
+            if client == 0:
+                if t == s: # this is an incoming connection
+                    c, addr = s.accept()
+                    serv_print('HELLO I am %s\n'%(name))
+                    socks['c']=c
+                    msg = 'HELLO I am %s\n'%(name)
                     c.send(msg.encode(ENCODING))
-                    socks['name']=t.getpeername()[0]
+                    #socks['name']=t.getpeername()[0]
 
-                elif t == 'HELLO':
-                    serv_print('HELLO %d\n'%(CODE_HELLO), 'Debug')
-                    name_cmd(name,c)
-                    serv_print('HELLO %d\n'%(name))
-                    msg = 'HELLO I am %d\n'%(name)
-                    c.send(msg.encode(ENCODING))
-            
-            # Command /ipsv4
-                if t == CMD_IPS:
-                    ips_cmd(c)
-                    serv_print('Ips List', 'Debug')
-                    serv_print('IPS %d\n'%(CODE_IPS), 'Debug')
+                    # Command /ipsv4
+                    if t == CMD_IPS:
+                        ips_cmd(c)
+                        serv_print('Ips List', 'Debug')
+                        serv_print('IPS %d\n'%(CODE_IPS), 'Debug')
 
-            # Command /pm
-                elif t == CMD_PM:
-                    msgp_cmd(t, c)
-                    serv_print('PM %d\n'%(CODE_PM), 'Debug')
+                    # Command /pm
+                    elif t == CMD_PM:
+                        msgp_cmd(t, c)
+                        serv_print('PM %d\n'%(CODE_PM), 'Debug')
 
-            # Command /bm
-                elif t == CMD_BM:
-                    msgb_cmd(t, c)
-                    serv_print('BM %d\n'%(CODE_BM), 'Debug')
+                    # Command /bm
+                    elif t == CMD_BM:
+                        msgb_cmd(t, c)
+                        serv_print('BM %d\n'%(CODE_BM), 'Debug')
 
-            # Command /ban
-                elif t == CMD_BAN:
-                    ban_cmd(t, c)
+                    # Command /ban
+                    elif t == CMD_BAN:
+                        ban_cmd(t, c)
 
-            # Command /unban
-                elif t == CMD_UNBAN:
-                    unban_cmd(t, c)
-                    
-            # Command /?
-                elif t == CMD_HELP:
-                    display_help(c)
-                    serv_print ('Help command!\n', 'Debug')
+                    # Command /unban
+                    elif t == CMD_UNBAN:
+                        unban_cmd(t, c)
+                            
+                    # Command /?
+                    elif t == CMD_HELP:
+                        display_help(c)
+                        serv_print ('Help command!\n', 'Debug')
 
-            # Command /quit
-                elif t == CMD_QUIT:
-                    quit_cmd(t, c, socks)
-                    serv_print ('Drop Connection %s!\n'%(who), 'Debug')
+                    # Command /quit
+                    elif t == CMD_QUIT:
+                        quit_cmd(t, c, socks)
+                        serv_print ('Drop Connection %s!\n'%(who), 'Debug')
 
-            # Standart message
-                else: # someone is speaking
-                    data = t
-                    who  = name
-
-                    if not data:
-                        socks['name'].remove(who)
-                        socks['socket'].remove(t)
-                        socks['c'].remove(c)
-                        msg = '[=Sign-off=] Drop Connection %s!\n'%(who)
-                    else:
-                        msg = '%s: %s!\n'%(who, data)
-                    
-                    serv_print (msg)
+            else: # someone is speaking
+                who=t.getpeername()[0]
+                data=t.recv(1024)
+                if data:
+                    msg="%s: %s\n" % (who, data.strip())
+                else: # connection closed
+                    socks.remove(t)
+                    msg="Goodbye %s!\n" % (who,)
+                print msg
