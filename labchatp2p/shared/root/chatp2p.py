@@ -252,13 +252,13 @@ if __name__ == '__main__':
         for t in lin:
             if client == 0:
                 if t == s: # this is an incoming connection
-                    c, addr = s.accept()
+                    (c, addr) = s.accept()
                     serv_print('HELLO I am %s\n'%(name))
                     socks['c']=c
                     msg = 'HELLO I am %s\n'%(name)
                     c.send(msg.encode(ENCODING))
                     #socks['name']=t.getpeername()[0]
-
+                    print ('test')
                     # Command /ipsv4
                     if t == CMD_IPS:
                         ips_cmd(c)
@@ -282,7 +282,7 @@ if __name__ == '__main__':
                     # Command /unban
                     elif t == CMD_UNBAN:
                         unban_cmd(t, c)
-                            
+                                
                     # Command /?
                     elif t == CMD_HELP:
                         display_help(c)
@@ -294,11 +294,14 @@ if __name__ == '__main__':
                         serv_print ('Drop Connection %s!\n'%(who), 'Debug')
 
             else: # someone is speaking
+                client = 0
                 who=t.getpeername()[0]
                 data=t.recv(1024)
                 if data:
                     msg="%s: %s\n" % (who, data.strip())
-                else: # connection closed
+                """else: # connection closed
                     socks.remove(t)
-                    msg="Goodbye %s!\n" % (who,)
+                    msg="Goodbye %s!\n" % (who,)"""
                 print msg
+                for c in socks['c']:
+                    c.send(msg)
