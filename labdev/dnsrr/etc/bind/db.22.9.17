@@ -1,0 +1,12 @@
+$TTL	60000
+@		IN	SOA	17.9.22.in-addr.arpa.	nobody.nowhere. (
+			1 ; serial
+			28 ; refresh
+			14 ; retry
+			3600000 ; expire
+			0 ; negative cache ttl
+			)
+@				IN	NS	92.17.9.22.in-addr.arpa.
+92.17.9.22.in-addr.arpa.	IN	A	22.9.17.92
+
+92.17	PTR	dnsrr.rr.com.

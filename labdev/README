@@ -1,0 +1,67 @@
+Devoir de TP de L3 Réseaux
+
+L'objectif de ce devoir est de configurer un petit réseau connecté à
+internet : configuration des interfaces, des routes, DHCP, NAT. 
+
+== The big picture ==
+
+Alice et Bob ont tous deux une connexion à internet au travers d'une
+box chacun. L'autoconfiguration DHCP est utilisée par l'un comme par
+l'autre, mais si la box de Bob est un serveur DHCP, Alice a, elle,
+un serveur DHCP indépendant sur son réseau local.
+
+Bob, de son côté, a sur son réseau local un site web hébergé par un
+serveur HTTP sur la machine www : "http://www.rr.com". Le nom de
+domaine www.rr.com est géré par le serveur dnsrr faisant authorité
+sur rr.com.
+
+Chacun utilise un bloc d'adresses privées sur son réseau local. Vous
+choisirez comme paramètres (blocs d'adresses privées pour les deux
+réseaux locaux) les paramètres proposés sur celene pour  l'un ou
+l'autre des membres du binôme. 
+
+== Ce qui est à configurer ==
+
+Seuls sont à modifier les fichiers mentionnés dans cette section. 
+
+Votre travail consiste à configurer les machines et services suivants :
+ - configurer (boxa) pour qu'il serve de passerelle aux machines de
+   lana.
+ - configurer un service de NAT sur (boxa) pour autoriser les
+   connexions de lana vers l'extérieur.
+ - configurer le serveur DHCP sur (dhcpa) pour qu'il distribue des
+   adresses à toute machine se connectant sur le réseau lana, dont
+   (alice). Il devra proposer dnsroot comme résolveur DNS.
+ - configurer le serveur DHCP sur (boxb) pour qu'il distribue des
+   adresses à toute machine se connectant sur le réseau lanb, dont
+   (bob). Il doit donner une adresse fixe à (www). Il devra proposer
+   dnsrr comme résolveur DNS.
+ - configurer le routeur (boxb) pour qu'il serve de passerelle aux
+   machines de lanb avec un service de NAT. Les connexions de lanb vers
+   l'extérieur doivent être possibles, ainsi que l'accès depuis l'
+   extérieur à la page http://www.rr.com hébergée sur la machine (www).
+ - modifier l'adresse de www dans dnsrr/etc/bind/db.com.rr
+ - BONUS : ajouter deux règles NAT pour permettre à Bob de consulter
+   la page web http://www.rr.com au moyen de la commande
+   "http://lynx www.rr.com".
+
+Pour tester votre configuration, vous pouvez exécuter les commandes
+suivantes :
+ - lynx http://www.perdu.com sur (alice)
+ - lynx http://www.rr.com sur (alice)
+ - lynx http://www.perdu.com sur (bob)
+ - BONUS : lynx http://www.rr.com sur (bob)
+
+== Modalités de retour du devoir ==
+
+Le devoir est à traiter en binôme (ou monôme). La solution est à déposer sous la
+forme d'une archive nommée nom1.prenom1_nom2.prenom2.tar.gz sur la
+page Celene du cours.
+
+L'archive doit contenir :
+ - un rapport au format PDF qui reprend les noms des membres du binôme,
+   les paramètres utilisés et expliquant brièvement le travail effectué.
+ - des enregistrements pcap (modalités dans le sujet de la partie 1 du
+   devoir) illustrant les commandes citées plus haut ainsi que les
+   échanges liés aux commandes de configuration sur lana, lanb et rezo.
+ - le lab modifié par vos soins.
