@@ -1,3 +1,5 @@
 #TODO
+
+ifconfig eth0 192.168.128.0/18
 ifconfig eth1 111.54.88.13/8
 /etc/init.d/quagga start
