@@ -13,7 +13,9 @@ modprobe iptable_nat
 # (POSTROUTING) pr ts les paquets qui sortent par ppp0 (-o ppp0) qui stipule
 # de camoufler la connexion (-j MASQUERADE)
 
-iptables -t nat -A POSTROUTING -o ppp0 -j MASQUERADE
+iptables -A FORWARD -i eth0 -j ACCEPT
+iptables -A FORWARD -o eth0 -j ACCEPT
+iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
 
 
 # Activer la redirection d'IP
