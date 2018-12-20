@@ -1,5 +1,22 @@
 #TODO
 
-ifconfig eth0 192.168.128.0/18
+ifconfig eth0 192.168.128.1/18
 ifconfig eth1 111.54.88.13/8
 /etc/init.d/quagga start
+
+
+# Charger le module du NAT (il charge tous les autres)
+
+modprobe iptable_nat
+
+
+# Dans la table du NAT (-t nat), ajouter une règle (-A) après le routage
+# (POSTROUTING) pr ts les paquets qui sortent par ppp0 (-o ppp0) qui stipule
+# de camoufler la connexion (-j MASQUERADE)
+
+iptables -t nat -A POSTROUTING -o ppp0 -j MASQUERADE
+
+
+# Activer la redirection d'IP
+
+echo 1 > /proc/sys/net/ipv4/ip_forward
