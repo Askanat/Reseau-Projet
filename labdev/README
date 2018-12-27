@@ -43,13 +43,13 @@ Votre travail consiste à configurer les machines et services suivants :
  - modifier l'adresse de www dans dnsrr/etc/bind/db.com.rr
  - BONUS : ajouter deux règles NAT pour permettre à Bob de consulter
    la page web http://www.rr.com au moyen de la commande
-   "http://lynx www.rr.com".
+   "lynx http://www.rr.com".
 
 Pour tester votre configuration, vous pouvez exécuter les commandes
 suivantes :
- - lynx http://www.perdu.com sur (alice)
- - lynx http://www.rr.com sur (alice)
- - lynx http://www.perdu.com sur (bob)
+ - lynx http://www.perdu.com sur (alice) OK
+ - lynx http://www.rr.com sur (alice) 
+ - lynx http://www.perdu.com sur (bob) OK
  - BONUS : lynx http://www.rr.com sur (bob)
 
 == Modalités de retour du devoir ==
