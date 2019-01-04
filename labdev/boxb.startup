@@ -17,14 +17,13 @@ modprobe iptable_nat
 
 iptables -A FORWARD -i eth0 -j ACCEPT
 iptables -A FORWARD -o eth0 -j ACCEPT
+
+net.ipv4.ip_forward = 1
+
 iptables -A FORWARD -i eth0 -p tcp --dport 80 -d 10.244.0.2 -j ACCEPT
+iptables -A FORWARD -o eth0 -p tcp --dport 80 -d 10.244.0.2 -j ACCEPT
 
 iptables -t nat -A PREROUTING -p tcp --dport 80 -i eth0 -j DNAT --to-destination 10.244.0.2:80
-iptables -t nat -A PREROUTING -p tcp --dport 80 -o eth0 -j DNAT --to-destination 10.244.0.2:80
-
-iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
-iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-
 
 # Activer la redirection d'IP
 
